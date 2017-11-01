@@ -89,6 +89,12 @@ inventory_groups = {
     "creation",
     "revenge",
   ],
+  puppets: [
+    "blade",
+    "decapitron",
+    "pinhead",
+    "jester"
+  ]
 }
 
 Vagrant.configure("2") do |config|
