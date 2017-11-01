@@ -1,0 +1,147 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+cpus = 1
+memory = 256 # RAM in MB. This should be enough for testing. The puppet master requires a lot more.
+hostname_suffix = "localdomain"
+
+vms = {
+  "puppetmaster" => {
+    ip: "192.168.100.2",
+    hostname: "puppetmaster.#{hostname_suffix}",
+    ports: [
+    { host_port: 81, guest_port: 80, id: "port-1" },
+    { host_port: 444, guest_port: 443, id: "port-1" }
+    ],
+    shares: [
+      { local: Dir.pwd + "/puppet-modules", remote: "/etc/puppetlabs/code/modules" }
+    ],
+    cpus: cpus,
+    memory: 4096,
+    box: "centos/7",
+    #aliases: ""
+  },
+  "creation" => {
+    ip: "192.168.100.3",
+    hostname: "creation.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: "centos/7",
+    #aliases: ""
+  },
+  "revenge" => {
+    ip: "192.168.100.4",
+    hostname: "revenge.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: "centos/7",
+    #aliases: ""
+  },
+  "blade" => {
+    ip: '192.168.101.2',
+    hostname: "blade.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: 'centos/7',
+    #aliases: ""
+  },
+  "decapitron" => {
+    ip: '192.168.101.3',
+    hostname: "decapitron.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: 'ubuntu/precise64',
+    #aliases: ""
+  },
+  "pinhead" => {
+    ip: '192.168.101.4',
+    hostname: "pinhead.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: 'debian/jessie64',
+    #aliases: ""
+  },
+  "jester" => {
+    ip: '192.168.101.5',
+    hostname: "jester.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: 'debian/wheezy64',
+    #aliases: ""
+  },
+}
+
+inventory_groups = {
+  puppetmasters: [
+    "puppetmaster",
+    "creation",
+    "revenge",
+  ],
+}
+
+Vagrant.configure("2") do |config|
+
+  vms.each_pair { |vm_name, vm_config|
+    config.vm.box = vm_config[:box]
+    config.vm.hostname = vm_config[:hostname]
+    config.hostmanager.enabled = true
+    config.hostmanager.manage_host = true
+    config.hostmanager.manage_guest = true
+    config.hostmanager.ignore_private_ip = false
+    config.hostmanager.include_offline = true
+
+    config.vm.define vm_name do |config|
+      config.vm.hostname = vm_config[:hostname]
+      config.vm.network :private_network, ip: vm_config[:ip]
+      config.hostmanager.aliases = vm_config[:aliases]
+
+      vm_config[:shares].each { |share|
+          config.vm.synced_folder share[:local], share[:remote]
+      } # vm_config[:shares].each
+
+      vm_config[:ports].each { |port_forwarding|
+          config.vm.network :forwarded_port,
+            host:  port_forwarding[:host_port],
+            guest: port_forwarding[:guest_port],
+            id:    port_forwarding[:id]
+      } # vm_config[:ports].each
+
+      config.vm.provider "virtualbox" do |vb|
+        vb.name = vm_name
+        vb.memory = vm_config[:memory]
+        vb.cpus = vm_config[:cpus]
+      end # :virtualbox
+
+      config.vm.provision "ansible" do |ansible|
+        ansible.groups = inventory_groups
+        ansible.playbook = "playbook.yml"
+        ansible.become = true
+
+        #ansible.become_user = "root"
+        #ansible.become_ask_pass = true
+        #ansible.limit = "" # connect to ALL the vagrants!
+        #ansible.ask_vault_pass = false # Change to true when using vaults.
+        #ansible.host_key_checking = false
+        #ansible.extra_vars = "" # string or hash
+        #ansible.skip_tags = []
+        #ansible.start_at_task = "Update web server intermediate certificate"
+        #ansible.tags = []
+
+      end # :ansible
+
+    end # config.vm.define
+  } # vms.each_pair
+
+end # Vagrant.config
