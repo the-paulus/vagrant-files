@@ -1,0 +1,4 @@
+[submodule "roles/puppet"]
+	path = puppet-ansible-test/roles/puppet
+	url = https://github.com/the-paulus/puppet.git
+	branch = development
