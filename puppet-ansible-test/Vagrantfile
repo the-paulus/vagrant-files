@@ -99,9 +99,7 @@ inventory_groups = {
 
 Vagrant.configure("2") do |config|
 
-  vms.each_pair { |vm_name, vm_config|
-    config.vm.box = vm_config[:box]
-    config.vm.hostname = vm_config[:hostname]
+  vms.each_pair do |vm_name, vm_config|
     config.hostmanager.enabled = true
     config.hostmanager.manage_host = true
     config.hostmanager.manage_guest = true
@@ -109,6 +107,7 @@ Vagrant.configure("2") do |config|
     config.hostmanager.include_offline = true
 
     config.vm.define vm_name do |config|
+      config.vm.box = vm_config[:box]
       config.vm.hostname = vm_config[:hostname]
       config.vm.network :private_network, ip: vm_config[:ip]
       config.hostmanager.aliases = vm_config[:aliases]
@@ -148,6 +147,6 @@ Vagrant.configure("2") do |config|
       end # :ansible
 
     end # config.vm.define
-  } # vms.each_pair
+  end # vms.each_pair
 
 end # Vagrant.config
