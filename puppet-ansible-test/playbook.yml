@@ -1,0 +1,6 @@
+---
+- name: Puppetmasters playbook
+  hosts: puppetmasters
+  roles:
+    - dump-vars
+    - puppet
