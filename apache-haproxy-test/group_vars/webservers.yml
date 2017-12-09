@@ -1,0 +1,146 @@
+---
+#################### APACHE VARIABLES ##########################
+# The following variables are defined in the geerlingguy.apache role.
+# In order to override the default values, we redefine them here.
+#
+# NOTE: Not all variables are used and therefore have been removed.
+#################################################################
+
+apache_listen_ip: "*"
+apache_listen_port: 80
+apache_listen_port_ssl: 443
+
+apache_create_vhosts: true
+apache_vhosts_filename: "vhosts.conf"
+apache_vhosts_template: "vhosts.conf.j2"
+
+apache_global_vhost_settings: |
+  DirectoryIndex index.php index.html
+  AddDefaultCharset utf-8
+  Alias /404 "/var/www/error/404.html"
+  Alias /403 "/var/www/error/403.html"
+  Alias /500 "/var/www/error/500.html"
+  Alias /503 "/var/www/error/503.html"
+  ErrorDocument 404 /404
+  ErrorDocument 403 /403
+  ErrorDocument 500 /500
+  ErrorDocument 503 /503
+  ServerSignature Off
+  ServerTokens Prod
+  ProxyRequests Off
+  RewriteEngine On
+
+apache_vhosts:
+  - servername: "www.haproxy.local"
+    documentroot: "/var/www/html/public"
+    serveralias: "www.{{ ansible_fqdn }}"
+
+apache_allow_override: "All"
+apache_options: "-Indexes +FollowSymLinks"
+
+apache_vhosts_ssl:
+  - servername: "www.haproxy.local"
+    serveralias: "www.{{ ansible_fqdn }}"
+    documentroot: "/var/www/html/public"
+    certificate_file: "/etc/ssl/certificate.crt"
+    certificate_key_file: "/etc/ssl/certificate.key"
+
+  # Additional properties:
+  # 'serveradmin, serveralias, allow_override, options, extra_parameters'.
+  # - servername: "local.dev",
+  #   documentroot: "/var/www/html",
+  #   certificate_file: "/path/to/certificate.crt",
+  #   certificate_key_file: "/path/to/certificate.key",
+  #   # Optional.
+  #   certificate_chain_file: "/path/to/certificate_chain.crt"
+
+apache_ignore_missing_ssl_certificate: true
+
+apache_ssl_protocol: "-all +TLSv1.2"
+apache_ssl_cipher_suite: "AES256+EECDH:AES256+EDH"
+
+#################### PHP VARIABLES ##########################
+# The following variables are defined in the PHP role.
+# In order to override the default values, we redefine them here.
+#
+# NOTE: Not all variables are used and therefore have been removed.
+#################################################################
+
+# Pass in a comma-separated list of repos to use (e.g. "remi,epel"). Used only
+# for RHEL/CentOS.
+php_enablerepo: ""
+
+php_packages_extra:
+  - php-fpm
+  - php-mcrypt
+  - php-mysqlnd
+  - php-oci8
+  - php-process
+  - php-pecl-zip
+
+# PHP-FPM configuration.
+php_enable_php_fpm: true
+php_fpm_daemon: "php-fpm"
+php_fpm_listen: "127.0.0.1:9000"
+php_fpm_listen_allowed_clients: "127.0.0.1"
+php_fpm_pm_max_children: 50
+php_fpm_pm_start_servers: 5
+php_fpm_pm_min_spare_servers: 5
+php_fpm_pm_max_spare_servers: 5
+
+# The executable to run when calling PHP from the command line.
+php_executable: "php"
+
+# OpCache settings.
+php_opcache_zend_extension: "opcache.so"
+php_opcache_enable: "1"
+php_opcache_enable_cli: "0"
+php_opcache_memory_consumption: "96"
+php_opcache_interned_strings_buffer: "16"
+php_opcache_max_accelerated_files: "4096"
+php_opcache_max_wasted_percentage: "5"
+php_opcache_validate_timestamps: "1"
+php_opcache_revalidate_path: "0"
+php_opcache_revalidate_freq: "2"
+php_opcache_max_file_size: "0"
+php_opcache_blacklist_filename: ""
+
+# APCu settings.
+php_enable_apc: true
+php_apc_shm_size: "96M"
+php_apc_enable_cli: "0"
+
+# If this is set to false, none of the following options will have any effect.
+# Any and all changes to /etc/php.ini will be your responsibility.
+php_use_managed_ini: true
+
+php_expose_php: "Off"
+php_memory_limit: "256M"
+php_max_execution_time: "60"
+php_max_input_time: "60"
+php_max_input_vars: "1000"
+php_realpath_cache_size: "32K"
+
+php_file_uploads: "On"
+php_upload_max_filesize: "64M"
+php_max_file_uploads: "20"
+
+php_post_max_size: "32M"
+php_date_timezone: "America/Chicago"
+php_allow_url_fopen: "On"
+
+php_sendmail_path: "/usr/sbin/sendmail -t -i"
+php_output_buffering: "4096"
+php_short_open_tag: "Off"
+php_disable_functions: []
+
+php_session_cookie_lifetime: 0
+php_session_gc_probability: 1
+php_session_gc_divisor: 1000
+php_session_gc_maxlifetime: 1440
+php_session_save_handler: files
+php_session_save_path: ''
+
+php_error_reporting: "E_ALL & ~E_DEPRECATED & ~E_STRICT"
+php_display_errors: "Off"
+php_display_startup_errors: "Off"
