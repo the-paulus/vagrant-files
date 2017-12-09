@@ -1,0 +1,21 @@
+galaxy_info:
+  author: Paul Lyon
+  description: your description
+  company: your company (optional)
+  issue_tracker_url: http://example.com/issue/tracker
+  license: BSD
+  min_ansible_version: 1.8
+  github_branch: master
+  platforms:
+    - name: CentOS
+      versions:
+      - 6
+      - 7
+    - name: RedHat
+      versions:
+      - 6
+      - 7
+  galaxy_tags:
+    - repository
+
+dependencies: []

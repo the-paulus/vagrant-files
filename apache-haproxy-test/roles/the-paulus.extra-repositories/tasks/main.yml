@@ -1,0 +1,33 @@
+---
+- name: Installing EPEL Repository
+  yum:
+    name: epel-release
+    state: latest
+  when: repository_install_epel
+
+- name: Installing IUS Repository for CentOS 6
+  yum:
+    name: https://centos6.iuscommunity.org/ius-release.rpm
+    state: present
+  when: ( ansible_distribution == "CentOS" and ansible_distribution_major_version == "6" ) and
+        ( repository_install_ius )
+
+- name: Installing IUS Repository for CentOS 7
+  yum:
+    name: https://centos7.iuscommunity.org/ius-release.rpm
+    state: present
+  when: ( ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" ) and
+        ( repository_install_ius )
+
+- name: Installing Remi Repository for RedHat 6
+  yum:
+    name: http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+    state: present
+  when: ( ansible_distribution == "CentOS" and ansible_distribution_major_version == "6" ) and
+        ( repository_install_remi )
+
+- name: Installing Remi Repository for RedHat 7
+  yum:
+    name: http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+    state: present
+  when: ( ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" )

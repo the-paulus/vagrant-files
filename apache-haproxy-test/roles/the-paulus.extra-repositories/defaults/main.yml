@@ -1,0 +1,4 @@
+---
+repository_install_epel: yes
+repository_install_ius: no
+repository_install_remi: yes

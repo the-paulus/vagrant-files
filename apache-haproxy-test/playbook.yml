@@ -1,0 +1,125 @@
+---
+- name: Common
+  hosts: all
+  roles:
+    - the-paulus.extra-repositories
+
+  tasks:
+    - name: Install packages
+      package:
+        name: "{{ item }}"
+      with_items:
+        - pyOpenSSL
+        - vim
+        - python2-pip
+
+    - name: Create Private Key and CSR
+      shell: "openssl req -new -nodes -newkey rsa:4096 -keyout certificate.key -out request.csr -subj '/C=US/ST=WI/L=Milwaukee/O=Testing/OU=Testing/CN=www.{{ ansible_fqdn }}'"
+      args:
+        chdir: /etc/ssl
+
+    - name: Create certificate
+      shell: "openssl x509 -req -days 365 -in request.csr -signkey certificate.key -out certificate.crt"
+      args:
+        chdir: /etc/ssl
+
+    - name: Combine Certificate and Key
+      shell: "cat certificate.crt certificate.key | tee certificate.pem"
+      args:
+        chdir: /etc/ssl
+
+    - name: Fetch Certificate
+      fetch:
+        dest: "remote_files"
+        src: /etc/ssl/certificate.pem
+
+- name: Apache Servers
+  hosts: webservers
+  roles:
+    - geerlingguy.php
+    - geerlingguy.apache-php-fpm
+
+  pre_tasks:
+    - name: Install yum-utils
+      yum:
+        name: yum-utils
+
+    - name: Use the remi-php70 packages
+      shell: "yum-config-manager --enable remi-php70"
+
+    - name: Create document roots
+      file:
+        path: "{{ item.documentroot }}"
+        state: directory
+        mode: 0755
+      with_items: "{{ apache_vhosts }}"
+
+  tasks:
+    - name: Update PHP
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install packages
+      package:
+        name: "{{ item }}"
+      with_items:
+        - composer
+
+    - name: Disable SELinux
+      shell: "setenforce 0"
+
+    - name: Install Laravel
+      shell: "rm -rf html && composer create-project --prefer-dist laravel/laravel html"
+      args:
+        chdir: /var/www
+
+    - name: Add Authentication
+      shell: "php artisan make:auth"
+      args:
+        chdir: /var/www/html
+
+    - name: Change Ownership
+      shell: "chown -R apache:apache /var/www/html"
+
+    - name: Update .env file
+      shell: "sed -i 's/{{ item.look }}/{{ item.replace }}/' .env"
+      args:
+        chdir: /var/www/html
+      with_items:
+        - look: 127.0.0.1
+          replace: 192.168.102.2
+        - look: homestead
+          replace: webapp
+        - look: secret
+          replace: webapp
+          
+- name: HAProxy Servers
+  hosts: loadbalancers
+  tasks:
+    - name: Install Packages
+      package:
+        name: "{{ item }}"
+      with_items:
+        - haproxy
+        - nmap-ncat
+
+    - name: Copy HAProxy Configuration File
+      copy:
+        dest: /etc/haproxy/haproxy.cfg
+        src: files/haproxy_passthrough_terminate.cfg
+
+    - name: Copy WS certificates
+      copy:
+        dest: "/etc/ssl/{{ item.name }}.pem"
+        src: "remote_files/{{ item.fqdn }}/etc/ssl/certificate.pem"
+      with_items:
+        - name: ws1
+          fqdn: ws1.local
+        - name: ws2
+          fqdn: ws2.local
+
+- name: Database Servers
+  hosts: databaseservers
+  roles:
+    - geerlingguy.mysql
