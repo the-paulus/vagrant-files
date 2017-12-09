@@ -36,6 +36,26 @@ vms = {
     box: "centos/7",
     aliases: []
   },
+  "db1" => {
+    ip: "192.168.102.2",
+    hostname: "db1.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: "centos/7",
+    aliases: []
+  },
+  "db2" => {
+    ip: "192.168.102.3",
+    hostname: "db2.#{hostname_suffix}",
+    ports: [],
+    shares: [],
+    cpus: cpus,
+    memory: memory,
+    box: "centos/7",
+    aliases: []
+  },
 }
 
 inventory_groups = {
@@ -45,6 +65,10 @@ inventory_groups = {
   webservers: [
     "ws1",
     "ws2",
+  ],
+  databaseservers: [
+    "db1",
+    "db2"
   ]
 }
 
