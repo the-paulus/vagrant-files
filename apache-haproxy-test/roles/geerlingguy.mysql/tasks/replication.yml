@@ -11,9 +11,6 @@
     and mysql_replication_user
     and (mysql_replication_master != '')
 
-- debug:
-    msg: "{{ mysql_replication_user['name'] }}"
-
 - name: Check slave replication status.
   mysql_replication:
     mode: getslave
