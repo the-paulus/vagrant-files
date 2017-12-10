@@ -98,7 +98,12 @@
           replace: webapp
         - look: secret
           replace: webapp
-          
+
+    - name: Run artisan migrate
+      shell: "php artisan migrate"
+      args:
+        chdir: /var/www/html
+
 - name: HAProxy Servers
   hosts: loadbalancers
   tasks:
