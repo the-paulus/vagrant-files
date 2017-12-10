@@ -33,6 +33,11 @@
         dest: "remote_files"
         src: /etc/ssl/certificate.pem
 
+- name: Database Servers
+  hosts: databaseservers
+  roles:
+    - geerlingguy.mysql
+
 - name: Apache Servers
   hosts: webservers
   roles:
@@ -118,8 +123,3 @@
           fqdn: ws1.local
         - name: ws2
           fqdn: ws2.local
-
-- name: Database Servers
-  hosts: databaseservers
-  roles:
-    - geerlingguy.mysql
