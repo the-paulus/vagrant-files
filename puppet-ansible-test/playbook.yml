@@ -1,6 +1,12 @@
 ---
-- name: Puppetmasters playbook
+- name: Puppetmasters play book
   hosts: puppetmasters
   roles:
     - dump-vars
-    - puppet
+    - "the-paulus.puppet"
+
+- name: Puppets play book
+  hosts: puppets
+  roles:
+    - dump-vars
+    - the-paulus.puppet-agent
