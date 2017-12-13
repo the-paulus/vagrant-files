@@ -3,83 +3,84 @@
 
 cpus = 1
 memory = 256 # RAM in MB. This should be enough for testing. The puppet master requires a lot more.
-hostname_suffix = "localdomain"
+pm_memory = 4192
+hostname_suffix = "example.com"
 
 vms = {
   "puppetmaster" => {
     ip: "192.168.100.2",
-    hostname: "puppetmaster.#{hostname_suffix}",
-    ports: [
-    { host_port: 81, guest_port: 80, id: "port-1" },
-    { host_port: 444, guest_port: 443, id: "port-1" }
-    ],
+    hostname: "puppetmaster",
+    ports: [],
     shares: [
       { local: Dir.pwd + "/puppet-modules", remote: "/etc/puppetlabs/code/modules" }
     ],
     cpus: cpus,
-    memory: 4096,
+    memory: pm_memory,
+    #box: "ubuntu/precise64",
     box: "centos/7",
-    #aliases: ""
+    aliases: [
+      "puppet"
+    ]
   },
   "creation" => {
     ip: "192.168.100.3",
-    hostname: "creation.#{hostname_suffix}",
+    hostname: "creation",
     ports: [],
     shares: [],
     cpus: cpus,
-    memory: memory,
+    memory: pm_memory,
     box: "centos/7",
-    #aliases: ""
+    aliases: []
   },
   "revenge" => {
     ip: "192.168.100.4",
-    hostname: "revenge.#{hostname_suffix}",
+    hostname: "revenge",
     ports: [],
     shares: [],
     cpus: cpus,
-    memory: memory,
+    memory: pm_memory,
     box: "centos/7",
-    #aliases: ""
+    aliases: []
   },
   "blade" => {
     ip: '192.168.101.2',
-    hostname: "blade.#{hostname_suffix}",
+    hostname: "blade",
     ports: [],
     shares: [],
     cpus: cpus,
     memory: memory,
     box: 'centos/7',
-    #aliases: ""
+    aliases: []
   },
   "decapitron" => {
     ip: '192.168.101.3',
-    hostname: "decapitron.#{hostname_suffix}",
+    hostname: "decapitron",
     ports: [],
     shares: [],
     cpus: cpus,
     memory: memory,
     box: 'ubuntu/precise64',
-    #aliases: ""
+    aliases: []
   },
   "pinhead" => {
     ip: '192.168.101.4',
-    hostname: "pinhead.#{hostname_suffix}",
+    hostname: "pinhead",
     ports: [],
     shares: [],
     cpus: cpus,
     memory: memory,
     box: 'debian/jessie64',
-    #aliases: ""
+    aliases: []
   },
   "jester" => {
     ip: '192.168.101.5',
-    hostname: "jester.#{hostname_suffix}",
+    hostname: "jester",
     ports: [],
     shares: [],
     cpus: cpus,
     memory: memory,
     box: 'debian/wheezy64',
-    #aliases: ""
+    aliases: []
   },
 }
 
@@ -100,17 +101,19 @@ inventory_groups = {
 Vagrant.configure("2") do |config|
 
   vms.each_pair do |vm_name, vm_config|
-    config.hostmanager.enabled = true
-    config.hostmanager.manage_host = true
-    config.hostmanager.manage_guest = true
-    config.hostmanager.ignore_private_ip = false
-    config.hostmanager.include_offline = true
+
+    config.landrush.enabled = true
+    config.landrush.tld = hostname_suffix
+    config.landrush.guest_redirect_dns = false
 
     config.vm.define vm_name do |config|
       config.vm.box = vm_config[:box]
-      config.vm.hostname = vm_config[:hostname]
+      config.vm.hostname = vm_config[:hostname] + '.' + hostname_suffix
       config.vm.network :private_network, ip: vm_config[:ip]
-      config.hostmanager.aliases = vm_config[:aliases]
+
+      vm_config[:aliases].each { |vm_alias|
+        config.landrush.host vm_alias, vm_config[:ip]
+      }
 
       vm_config[:shares].each { |share|
           config.vm.synced_folder share[:local], share[:remote]
