@@ -1,0 +1,138 @@
+# Boxes
+# - ubuntu/trusty64 (14.04)
+# - ubuntu/xenial64 (16.04)
+# - cmiles/gentoo-amd64-minimal
+# - debian/jessie64
+# - debian/wheezy64
+
+hostname_suffix = "example.com"
+
+vms = {
+  "gentoo" => {
+    box: "generic/gentoo",
+    cpus: 4,
+    memory: 2048,
+    ip: "192.168.100.2",
+    hostname: "gentoo",
+    aliases: [],
+    ports: [],
+    shares: [
+      { local: Dir.pwd + "/backups/gentoo", remote: "/mnt/backup" }
+    ],
+  },
+  "debian" => {
+    box: "debian/jessie64",
+    cpus: 1,
+    memory: 512,
+    ip: "192.168.100.3",
+    hostname: "debian",
+    aliases: [],
+    ports: [],
+    shares: [
+      { local: Dir.pwd + "/backups/debian", remote: "/mnt/backup" }
+    ],
+  },
+  "centos" => {
+    box: "centos/7",
+    cpus: 1,
+    memory: 512,
+    ip: "192.168.100.4",
+    aliases: [],
+    ports: [],
+    shares: [
+      { local: Dir.pwd + "/backups/centos", remote: "/mnt/backup" }
+    ],
+  },
+  "redhat" => {
+    box: "samdoran/rhel7",
+    cpus: 1,
+    memory: 512,
+    ip: "192.168.100.5",
+    aliases: [],
+    ports: [],
+    shares: [
+      { local: Dir.pwd + "/backups/redhat", remote: "/mnt/backup" }
+    ],
+  },
+  "ubuntu" => {
+    box: "ubuntu/xenial64",
+    cpus: 1,
+    memory: 512,
+    ip: "192.168.100.6",
+    aliases: [],
+    ports: [],
+    shares: [
+      { local: Dir.pwd + "/backups/ubuntu", remote: "/mnt/backup" }
+    ],
+  },
+  "archlinux" => {
+    box: "archlinux/archlinux",
+    cpus: 1,
+    memory: 512,
+    ip: "192.168.100.7",
+    aliases: [],
+    ports: [],
+    shares: [
+      { local: Dir.pwd + "/backups/archlinux", remote: "/mnt/backup" }
+    ],
+  }
+}
+
+inventory_groups = {
+
+}
+
+host_vars = {
+  "ubuntu" => {
+    "ansible_python_interpreter" => "/usr/bin/python3"
+  },
+  "archlinux" => {
+    "ansible_python_interpreter" => "/usr/bin/python2.7"
+  }
+}
+
+Vagrant.configure("2") do |config|
+
+  config.landrush.enabled = true
+  config.landrush.tld = hostname_suffix
+  config.landrush.guest_redirect_dns = false
+
+  vms.each_pair do |vm_name, vm_config|
+
+    config.vm.define vm_name do |config|
+      config.vm.box = vm_config[:box]
+      config.vm.hostname = vm_config[:hostname]
+      config.vm.network :private_network, ip: vm_config[:ip]
+
+      vm_config[:aliases].each { |vm_alias|
+        config.landrush.host vm_alias, vm_config[:ip]
+      }
+
+      vm_config[:shares].each { |share|
+          config.vm.synced_folder share[:local], share[:remote]
+      } # vm_config[:shares].each
+
+      vm_config[:ports].each { |port_forwarding|
+          config.vm.network :forwarded_port,
+            host:  port_forwarding[:host_port],
+            guest: port_forwarding[:guest_port],
+            id:    port_forwarding[:id]
+      } # vm_config[:ports].each
+
+      config.vm.provider "virtualbox" do |vb|
+        vb.name = vm_name
+        vb.memory = vm_config[:memory]
+        vb.cpus = vm_config[:cpus]
+      end # :virtualbox
+
+      config.vm.provision "ansible" do |ansible|
+        ansible.groups = inventory_groups
+        ansible.playbook = "playbook.yml"
+        ansible.become = true
+
+      end # :ansible
+
+    end # config.vm.define
+  end # vms.each_pair
+
+end # Vagrant.config
