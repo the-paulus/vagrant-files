@@ -1,0 +1,14 @@
+---
+- hosts: archlinux
+  gather_facts: no
+  tasks:
+    - name: Check for python binary
+      raw: "pacman -S --noconfirm python2"
+
+- hosts: all
+  roles:
+    - the-paulus.dump-vars
+    #- { role: the-paulus.redhat-subscription, when: ansible_distribution == 'RedHat' }
+    - extra-repositories
+    #- common-linux-commands
+    #- the-paulus.backup-duply
