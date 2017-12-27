@@ -8,7 +8,7 @@
 - hosts: all
   roles:
     - the-paulus.dump-vars
-    #- { role: the-paulus.redhat-subscription, when: ansible_distribution == 'RedHat' }
-    - extra-repositories
-    #- common-linux-commands
-    #- the-paulus.backup-duply
+    - { role: the-paulus.redhat-subscription, when: ansible_distribution == 'RedHat' }
+    - the-paulus.extra-repositories
+    - the-paulus.common-linux-commands
+    - the-paulus.backup-duply
