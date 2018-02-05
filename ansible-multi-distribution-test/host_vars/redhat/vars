@@ -1,0 +1,6 @@
+---
+redhat_subscription_username: "{{ vault_redhat_subscription_username }}"
+redhat_subscription_password: "{{ vault_redhat_subscription_password }}"
+redhat_subscription_client_id: "{{ vault_redhat_subscription_client_id }}" 
+redhat_subscription_repositories:
+  - rhel-7-server-extras-rpms
