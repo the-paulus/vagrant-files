@@ -16,7 +16,6 @@ vms = {
     ],
     cpus: cpus,
     memory: pm_memory,
-    #box: "ubuntu/precise64",
     box: "centos/7",
     aliases: [
       "puppet"
