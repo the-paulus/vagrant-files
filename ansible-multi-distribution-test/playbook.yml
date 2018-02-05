@@ -12,3 +12,33 @@
     - the-paulus.extra-repositories
     - the-paulus.common-linux-commands
     - the-paulus.backup-duply
+    #- the-paulus.selinux
+    #- apache
+  tasks:
+    - name: Create ansible group
+      group:
+        name: ansible
+        state: present
+
+    - name: Create ansible user
+      user:
+        name: ansible
+        update_password: always
+        ssh_key_type: rsa
+        groups: ansible
+        home: /home/ansible
+        password: "$6$qs3wg3SxDPx4i1T0$S9KE8/VgjJsKN89fsYDW9Zt.MUF2VUT2tPp7UVLKBcyeEJGFW4YLk99YCw/jhkvsyGKNDBL9VWgefCBUHTuW21"
+        generate_ssh_key: yes
+        ssh_key_bits: 4096
+        createhome: yes
+        system: no
+        state: present
+        ssh_key_file: .ssh/id_rsa
+
+    - name: Update sudoers configuration
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: "^%ansible"
+        line: "%ansible ALL=(ALL) NOPASSWD: ALL"
+        validate: visudo -cf %s
