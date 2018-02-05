@@ -99,10 +99,14 @@
         - look: secret
           replace: webapp
 
+    - name: Fix Charset and Collaition
+      shell: "sed -i 's/utf8mb4/utf8/' /var/www/html/config/database.php"
+
     - name: Run artisan migrate
       shell: "php artisan migrate"
       args:
         chdir: /var/www/html
+      run_once: yes
 
 - name: HAProxy Servers
   hosts: loadbalancers
@@ -121,10 +125,8 @@
 
     - name: Copy WS certificates
       copy:
-        dest: "/etc/ssl/{{ item.name }}.pem"
-        src: "remote_files/{{ item.fqdn }}/etc/ssl/certificate.pem"
+        dest: "/etc/ssl/{{ item }}.pem"
+        src: "remote_files/{{ item }}/etc/ssl/certificate.pem"
       with_items:
-        - name: ws1
-          fqdn: ws1.local
-        - name: ws2
-          fqdn: ws2.local
+        - ws1
+        - ws2

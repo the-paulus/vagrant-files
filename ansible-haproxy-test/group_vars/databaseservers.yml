@@ -122,8 +122,8 @@ mysql_expire_logs_days: "10"
 mysql_replication_role: ''
 mysql_replication_master: ''
 # Same keys as `mysql_users` above.
-mysql_replication_user:
-  - name: replicate
-    host: '%'
-    password: replicate
-    priv: "*.*:REPLICATION SLAVE,REPLICATION CLIENT"
+mysql_replication_user: []
+  #- name: replicate
+  #  host: '%'
+  #  password: replicate
+  #  priv: "*.*:REPLICATION SLAVE,REPLICATION CLIENT"

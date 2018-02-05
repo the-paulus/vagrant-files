@@ -1,9 +1,0 @@
----
-mysql_server_id: "2"
-mysql_replication_role: 'slave'
-mysql_replication_master: '192.168.102.2'
-mysql_replication_user:
-  - name: replicate
-    host: '%'
-    password: replicate
-    priv: "*.*:USAGE"
