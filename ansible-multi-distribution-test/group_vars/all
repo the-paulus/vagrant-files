@@ -1,0 +1,46 @@
+---
+backup_duply_profiles:
+  home:
+    #gpg_key: "GPG_KEY_ID"
+    #gpg_pw: "GPG_PASSWORD"
+    #gpg_keys_enc: "<pubkey1>,<pubkey2>"
+    #gpg_key_sign: "<privkey>"
+    #gpg_pw_sign: "<signpass>"
+    #gpg_opts: "--homedir ~/.duply"
+    target: "file:///mnt/backup/home"
+    #target_user: "backup"
+    #target_pass: "backuppassword"
+    source: "/home"
+    #duply_precmd: "trickle -s -u 640 -d 5120"
+    exclude_filename: ".duplicity-ignore"
+    max_age: "1M"
+    max_full_backups: 1
+    max_fulls_with_incrementals: 1
+    max_full_backup_age: "1M"
+    volume_size: "50"
+    temp_dir: "/tmp"
+    #arch_dir: "/safe/location"
+    #options: ""
+    excludes:
+      - "**/.local/share/Trash"
+      - "**/Dropbox"
+    #pre: >
+    #  WORKDIR="/tmp"
+    #post: >
+    #  WORKDIR="/tmp"
+    cron_job:
+      task: "backup"
+      day: "*"
+      hour: "0"
+      minute: "0"
+      month: "*"
+      weekday: "*"
+  etc:
+    target: "file:///mnt/backup/etc"
+    source: "/etc"
+    max_age: "1M"
+    max_full_backups: 1
+    max_fulls_with_incrementals: 1
+    max_full_backup_age: "1M"
+    volume_size: "25"
+    temp_dir: "/tmp"
