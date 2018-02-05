@@ -1,16 +1,10 @@
-# Boxes
-# - ubuntu/trusty64 (14.04)
-# - ubuntu/xenial64 (16.04)
-# - cmiles/gentoo-amd64-minimal
-# - debian/jessie64
-# - debian/wheezy64
 
 hostname_suffix = "example.com"
 
 vms = {
   "gentoo" => {
     box: "generic/gentoo",
-    cpus: 4,
+    cpus: 6,
     memory: 2048,
     ip: "192.168.100.2",
     hostname: "gentoo",
@@ -37,7 +31,12 @@ vms = {
     cpus: 1,
     memory: 512,
     ip: "192.168.100.4",
-    aliases: [],
+    aliases: [
+      "example.com",
+      "www.example.com",
+      "example2.com",
+      "www.example2.com"
+    ],
     ports: [],
     shares: [
       { local: Dir.pwd + "/backups/centos", remote: "/mnt/backup" }
@@ -79,7 +78,9 @@ vms = {
 }
 
 inventory_groups = {
-
+  "webservers" => [
+    "centos"
+  ]
 }
 
 host_vars = {
@@ -127,6 +128,7 @@ Vagrant.configure("2") do |config|
 
       config.vm.provision "ansible" do |ansible|
         ansible.groups = inventory_groups
+        ansible.host_vars = host_vars
         ansible.playbook = "playbook.yml"
         ansible.become = true
 
