@@ -1,0 +1,3 @@
+---
+redhat_subscription_respositories:
+  - rhel-7-server-extras-rpms
